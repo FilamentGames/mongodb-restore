@@ -478,45 +478,29 @@ function wrapper (my) {
 
   const discriminator = allCollections;
 
-  if (!my.logger || ['function', 'string'].indexOf(typeof my.logger) === -1) {
+  if (typeof my.logger !== 'function') {
 
-    logger = function () {
+    logger = function (message) {
 
-      return;
+      return console.log(message);
 
     };
 
   } else {
 
-    if (typeof my.logger === 'function') {
-
-      logger = my.logger;
-
-      return;
-
-    }
-
-    logger = require('logger-request')({
-      filename: path.resolve(my.logger),
-      standalone: true,
-      daily: true,
-      winston: {
-        logger: '_mongo_r' + path.resolve(my.logger),
-        level: 'info',
-        json: false,
-      },
-    });
-    logger('restore start');
-    const log = require('mongodb').Logger;
-
-    log.setLevel('info');
-    log.setCurrentLogger(function (msg) {
-
-      logger(msg);
-
-    });
+    logger = my.logger;
 
   }
+
+  logger('restore start');
+  const log = require('mongodb').Logger;
+
+  log.setLevel('info');
+  log.setCurrentLogger(function (msg) {
+
+    logger(msg);
+
+  });
 
   let metadata = '';
 
