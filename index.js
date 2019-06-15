@@ -488,12 +488,20 @@ function wrapper (my) {
 
   } else {
 
+    if (typeof my.logger === 'function') {
+
+      logger = my.logger;
+
+      return;
+
+    }
+
     logger = require('logger-request')({
-      filename: my.logger,
+      filename: path.resolve(my.logger),
       standalone: true,
       daily: true,
       winston: {
-        logger: '_mongo_r' + my.logger,
+        logger: '_mongo_r' + path.resolve(my.logger),
         level: 'info',
         json: false,
       },
@@ -651,7 +659,7 @@ function wrapper (my) {
 
   makeDir(my.dir, function () {
 
-    const extractor = require('tar').Extract({
+    const extractor = require('tar').x({
       path: my.dir,
     })
       .on('error', callback)
@@ -729,7 +737,7 @@ function restore (options) {
     parser: opt.parser || 'bson',
     callback: typeof opt.callback === 'function' ? opt.callback : null,
     tar: typeof opt.tar === 'string' ? opt.tar : null,
-    logger: typeof opt.logger === 'string' ? path.resolve(opt.logger) : null,
+    logger: opt.logger,
     metadata: Boolean(opt.metadata),
     drop: Boolean(opt.drop),
     dropCollections: opt.dropCollections ? opt.dropCollections : null,
