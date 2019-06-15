@@ -478,7 +478,7 @@ function wrapper (my) {
 
   const discriminator = allCollections;
 
-  if (my.logger === null) {
+  if (!my.logger || ['function', 'string'].indexOf(typeof my.logger) === -1) {
 
     logger = function () {
 
