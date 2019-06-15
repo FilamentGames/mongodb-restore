@@ -28,7 +28,8 @@
     "graceful-fs": "^4.1.15",
     "logger-request": "3.8.0",
     "mongodb": "^3.2.7",
-    "tar": "^4.4.10"
+    "tar": "^4.4.10",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "dotenv": "^8.0.0",

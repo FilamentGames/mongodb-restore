@@ -32,7 +32,7 @@ function error (err) {
 
   if (err) {
 
-    logger(err.message);
+    logger.error('Error', err);
 
   }
 
@@ -109,7 +109,7 @@ function makeDir (pathname, next) {
 
     if (err && err.code === 'ENOENT') {
 
-      logger('make dir at ' + pathname);
+      logger.info('Creating directory at ' + pathname);
 
       return fs.mkdir(pathname, function (err) {
 
@@ -119,14 +119,17 @@ function makeDir (pathname, next) {
 
     } else if (stats && stats.isDirectory() === false) {
 
-      logger('unlink file at ' + pathname);
+      logger.info('Unlinking file at ' + pathname);
 
       return fs.unlink(pathname, function () {
 
-        logger('make dir at ' + pathname);
-        fs.mkdir(pathname, function (err) {
+        logger.info('Creating directory at ' + pathname);
 
-          next(err, pathname);
+        fs.mkdir(pathname, function (mkDirErr) {
+
+          logger.error('Creating directory failed.', mkDirErr);
+
+          next(mkDirErr, pathname);
 
         });
 
@@ -368,19 +371,22 @@ function allCollections (db, name, metadata, parser, next) {
         return last === ++counter ? next(err) : error(err);
 
       }
-      logger('select collection ' + collectionName);
-      meta(collection, metadata, function (err) {
 
-        if (err) {
+      logger.info('Selecting collection ' + collectionName);
 
-          error(err);
+      meta(collection, metadata, function (metaErr) {
+
+        if (metaErr) {
+
+          logger.error('Meta failed.', metaErr);
 
         }
-        parser(collection, collectionPath + path.sep, function (err) {
 
-          if (err) {
+        parser(collection, collectionPath + path.sep, function (parserErr) {
 
-            return last === ++counter ? next(err) : error(err);
+          if (parserErr) {
+
+            return last === ++counter ? next(parserErr) : error(parserErr);
 
           }
 
@@ -419,7 +425,7 @@ function someCollections (db, collections, next) {
 
     db.collection(collection, function (err, collection) {
 
-      logger('select collection ' + collection.collectionName);
+      logger.info('Selecting collection ' + collection.collectionName);
       if (err) {
 
         return last === ++counter ? next(err) : error(err);
@@ -478,27 +484,25 @@ function wrapper (my) {
 
   const discriminator = allCollections;
 
-  if (typeof my.logger !== 'function') {
 
-    logger = function (message) {
+  if (typeof my.logger === 'string' || Array.isArray(my.logger)) {
 
-      return console.log(message);
-
-    };
+    logger = require('./logger')(my.logger);
 
   } else {
 
-    logger = my.logger;
+    logger = require('./logger')();
 
   }
 
-  logger('restore start');
+
+  logger.info('restore start');
   const log = require('mongodb').Logger;
 
   log.setLevel('info');
   log.setCurrentLogger(function (msg) {
 
-    logger(msg);
+    logger.info(msg);
 
   });
 
@@ -525,7 +529,8 @@ function wrapper (my) {
    */
   function callback (err) {
 
-    logger('restore stop');
+    logger.info('Restore stop');
+
     if (my.tar) {
 
       rmDir(my.dir);
@@ -534,12 +539,13 @@ function wrapper (my) {
 
     if (my.callback !== null) {
 
-      logger('callback run');
+      logger.info('Callback run');
+
       my.callback(err);
 
     } else if (err) {
 
-      logger(err);
+      logger.error('Callback failed.', err);
 
     }
 
@@ -560,30 +566,37 @@ function wrapper (my) {
     require('mongodb').MongoClient.connect(my.uri, my.options,
       function (err, db) {
 
-        logger('db open');
+        logger.info('Connected to the database.');
+
         if (err) {
+
+
+          logger.error('Connecting to database failed.', err);
 
           return callback(err);
 
         }
 
-        function next (err) {
+        function next (nextErr) {
 
-          if (err) {
+          if (nextErr) {
 
-            logger('db close');
+            logger.error('Next failed.', nextErr);
+
             db.close();
 
-            return callback(err);
+            return callback(nextErr);
 
           }
 
           // waiting for `db.fsyncLock()` on node driver
-          discriminator(db, root, metadata, parser, function (err) {
+          discriminator(db, root, metadata, parser, function (discriminatorErr) {
 
-            logger('db close');
+            logger.error('Discriminator failed.', discriminatorErr);
+
             db.close();
-            callback(err);
+
+            callback(discriminatorErr);
 
           });
 
@@ -591,13 +604,14 @@ function wrapper (my) {
 
         if (my.drop === true) {
 
-          logger('drop database');
+          logger.info('Dropping database.');
 
           return db.dropDatabase(next);
 
         } else if (my.dropCollections) {
 
-          logger('drop collections');
+          logger.info('Dropping collections.');
+
           if (Array.isArray(my.dropCollections) === true) {
 
             return someCollections(db, my.dropCollections, next);
@@ -667,13 +681,21 @@ function wrapper (my) {
 
     if (my.stream !== null) { // user stream
 
-      logger('get tar file from stream');
+      logger.info('Getting tar file from stream.');
+
       my.stream.pipe(extractor);
 
     } else { // filesystem stream
 
-      logger('open tar file at ' + my.root + my.tar);
-      fs.createReadStream(my.root + my.tar).on('error', callback)
+      logger.info('Opening tar file at ' + my.root + my.tar);
+
+      fs.createReadStream(my.root + my.tar).on('error', (err) => {
+
+        logger.error('Opening tar file failed.', err);
+
+        callback();
+
+      })
         .pipe(
           extractor);
 
