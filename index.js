@@ -431,11 +431,11 @@ function someCollections (db, collections, next) {
         return last === ++counter ? next(err) : error(err);
 
       }
-      collection.drop(function (err) {
+      collection.drop(function (dropErr) {
 
-        if (err) {
+        if (dropErr) {
 
-          error(err); // log if missing
+          error(dropErr); // log if missing
 
         }
 
@@ -496,7 +496,8 @@ function wrapper (my) {
   }
 
 
-  logger.info('restore start');
+  logger.info('Restoration starting.');
+
   const log = require('mongodb').Logger;
 
   log.setLevel('info');
@@ -529,7 +530,7 @@ function wrapper (my) {
    */
   function callback (err) {
 
-    logger.info('Restore stop');
+    logger.info('Restoration ended.');
 
     if (my.tar) {
 
@@ -539,13 +540,11 @@ function wrapper (my) {
 
     if (my.callback !== null) {
 
-      logger.info('Callback run');
-
       my.callback(err);
 
     } else if (err) {
 
-      logger.error('Callback failed.', err);
+      logger.error('Restoration failed.', err);
 
     }
 
@@ -592,11 +591,15 @@ function wrapper (my) {
           // waiting for `db.fsyncLock()` on node driver
           discriminator(db, root, metadata, parser, function (discriminatorErr) {
 
-            logger.error('Discriminator failed.', discriminatorErr);
+            if (discriminatorErr) {
 
-            db.close();
+              logger.error('Discriminator failed.', discriminatorErr);
 
-            callback(discriminatorErr);
+              db.close();
+
+              callback(discriminatorErr);
+
+            }
 
           });
 
@@ -660,7 +663,11 @@ function wrapper (my) {
     const extractor = require('tar').x({
       path: my.dir,
     })
-      .on('error', callback)
+      .on('error', (tarErr) => {
+
+        logger.error('Extracting tar failed.', tarErr);
+
+      })
       .on('end', function () {
 
         const dirs = fs.readdirSync(my.dir);
@@ -689,15 +696,15 @@ function wrapper (my) {
 
       logger.info('Opening tar file at ' + my.root + my.tar);
 
-      fs.createReadStream(my.root + my.tar).on('error', (err) => {
+      fs.createReadStream(my.root + my.tar)
+        .on('error', (err) => {
 
-        logger.error('Opening tar file failed.', err);
+          logger.error('Opening tar file failed.', err);
 
-        callback();
+          callback(err);
 
-      })
-        .pipe(
-          extractor);
+        })
+        .pipe(extractor);
 
     }
 
