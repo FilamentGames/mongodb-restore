@@ -589,7 +589,7 @@ function wrapper (my) {
           }
 
           // waiting for `db.fsyncLock()` on node driver
-          discriminator(_client, root, metadata, parser, function (discriminatorErr) {
+          discriminator(_client.db(), root, metadata, parser, function (discriminatorErr) {
 
             if (discriminatorErr) {
 
