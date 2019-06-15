@@ -661,7 +661,7 @@ function wrapper (my) {
   makeDir(my.dir, function () {
 
     const extractor = require('tar').x({
-      path: my.dir,
+      C: my.dir,
     })
       .on('error', (tarErr) => {
 
