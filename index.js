@@ -563,7 +563,7 @@ function wrapper (my) {
 
     }
     require('mongodb').MongoClient.connect(my.uri, my.options,
-      function (err, db) {
+      function (err, _client) {
 
         logger.info('Connected to the database.');
 
@@ -582,20 +582,20 @@ function wrapper (my) {
 
             logger.error('Next failed.', nextErr);
 
-            db.close();
+            _client.close();
 
             return callback(nextErr);
 
           }
 
           // waiting for `db.fsyncLock()` on node driver
-          discriminator(db, root, metadata, parser, function (discriminatorErr) {
+          discriminator(_client, root, metadata, parser, function (discriminatorErr) {
 
             if (discriminatorErr) {
 
               logger.error('Discriminator failed.', discriminatorErr);
 
-              db.close();
+              _client.close();
 
               callback(discriminatorErr);
 
@@ -609,7 +609,7 @@ function wrapper (my) {
 
           logger.info('Dropping database.');
 
-          return db.dropDatabase(next);
+          return _client.db().dropDatabase(next);
 
         } else if (my.dropCollections) {
 
@@ -617,11 +617,11 @@ function wrapper (my) {
 
           if (Array.isArray(my.dropCollections) === true) {
 
-            return someCollections(db, my.dropCollections, next);
+            return someCollections(_client, my.dropCollections, next);
 
           }
 
-          return db.collections(function (err, collections) {
+          return _client.collections(function (err, collections) {
 
             if (err) { // log if missing
 
@@ -640,7 +640,7 @@ function wrapper (my) {
               }
 
             }
-            someCollections(db, my.dropCollections, next);
+            someCollections(_client, my.dropCollections, next);
 
           });
 
