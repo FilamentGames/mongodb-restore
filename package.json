@@ -24,20 +24,20 @@
   },
   "main": "index.min.js",
   "dependencies": {
-    "bson": "1.0.4",
-    "graceful-fs": "4.1.11",
+    "bson": "^4.0.2",
+    "graceful-fs": "^4.1.15",
     "logger-request": "3.8.0",
-    "mongodb": "2.2.26",
-    "tar": "2.2.1"
+    "mongodb": "^3.2.7",
+    "tar": "^4.4.10"
   },
   "devDependencies": {
     "grunt": "~1.0",
-    "grunt-contrib-uglify": "~3.0",
-    "grunt-contrib-jshint": "~1.1",
-    "grunt-endline": "~0.6",
-    "grunt-safer-regex": "~0.0",
+    "grunt-contrib-jshint": "^2.1.0",
+    "grunt-contrib-uglify": "^4.0.1",
+    "grunt-endline": "^0.7.0",
+    "grunt-safer-regex": "^0.1.0",
     "istanbul": "~0.4",
-    "mocha": "~3.4",
+    "mocha": "^6.1.4",
     "mongodb-backup": "~1.6"
   },
   "engines": {
