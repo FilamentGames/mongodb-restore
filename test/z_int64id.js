@@ -18,12 +18,15 @@ const fs = require('fs');
 const extname = require('path').extname;
 const mongodb = require('mongodb');
 const BSON = require('bson');
+const dotenv = require('dotenv');
+
+dotenv.config({ path: `${__dirname}/../.env` });
 
 const client = mongodb.MongoClient;
 const MLong = mongodb.Long;
 const BLong = BSON.Long;
 const URI = process.env.URI;
-const URI2 = process.env.URI2;
+const URI2 = process.env.SRC_DB_URI
 const Root = __dirname + '/dump';
 const Collection = 'test_8';
 

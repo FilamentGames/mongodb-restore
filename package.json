@@ -22,7 +22,7 @@
     "url": "https://github.com/hex7c0/mongodb-restore/issues",
     "email": "hex7c0@gmail.com"
   },
-  "main": "index.min.js",
+  "main": "index.js",
   "dependencies": {
     "bson": "^4.0.2",
     "graceful-fs": "^4.1.15",
@@ -31,6 +31,7 @@
     "tar": "^4.4.10"
   },
   "devDependencies": {
+    "dotenv": "^8.0.0",
     "grunt": "~1.0",
     "grunt-contrib-jshint": "^2.1.0",
     "grunt-contrib-uglify": "^4.0.1",

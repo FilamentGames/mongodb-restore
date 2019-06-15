@@ -1,4 +1,4 @@
-'use strict';
+
 /**
  * @file error test
  * @module mongodb-restore
@@ -11,107 +11,136 @@
 /*
  * initialize module
  */
-var restore = require('..');
-var assert = require('assert');
+let restore = require('..');
+let assert = require('assert');
+const dotenv = require('dotenv');
+
+dotenv.config({ path: `${__dirname}/../.env` });
+
 
 /*
  * test module
  */
-describe('error', function() {
+describe('error', function () {
 
-  it('should return missing uri', function(done) {
+  it('should return missing uri', function (done) {
 
-    var mex = /missing uri option/;
-    assert.throws(function() {
+    let mex = /missing uri option/;
+
+    assert.throws(function () {
 
       restore();
-    }, mex);
-    assert.throws(function() {
+
+}, mex);
+    assert.throws(function () {
 
       restore({});
-    }, mex);
-    assert.throws(function() {
+
+}, mex);
+    assert.throws(function () {
 
       restore({
-        root: 'ciao'
+        root: 'ciao',
       });
-    }, mex);
-    done();
-  });
-  it('should return parser root', function(done) {
 
-    var mex = /missing parser option/;
-    assert.throws(function() {
+}, mex);
+    done();
+
+});
+  it('should return parser root', function (done) {
+
+    let mex = /missing parser option/;
+
+    assert.throws(function () {
 
       restore({
         uri: 'ciao',
         root: __dirname,
-        parser: 'ciao'
+        parser: 'ciao',
       });
-    }, mex);
-    done();
-  });
-  it('should return wrong uri', function(done) {
 
-    var mex = /invalid schema, expected mongodb/;
-    assert.throws(function() {
+}, mex);
+    done();
+
+});
+  it('should return wrong uri', function (done) {
+
+    let mex = /invalid schema, expected mongodb/;
+
+    assert.throws(function () {
 
       restore({
         uri: 'ciao',
-        root: __dirname
+        root: __dirname,
       });
-    }, mex);
+
+}, mex);
     done();
-  });
 
-  describe('root', function() {
+});
 
-    it('should return missing root', function(done) {
+  describe('root', function () {
 
-      var mex = /missing root option/;
-      assert.throws(function() {
+    it('should return missing root', function (done) {
 
-        restore({
-          uri: 'ciao'
-        });
-      }, mex);
-      done();
-    });
-    it('should return wrong root (not exists)', function(done) {
+      let mex = /missing root option/;
 
-      var mex = /root option is not a directory/;
-      assert.throws(function() {
+      assert.throws(function () {
 
         restore({
           uri: 'ciao',
-          root: 'ciao'
         });
-      }, mex);
-      done();
-    });
-    it('should return different error message (exists)', function(done) {
 
-      var mex = /root option is not a directory/;
-      assert.throws(function() {
+}, mex);
+      done();
+
+});
+    it('should return wrong root (not exists)', function (done) {
+
+      let mex = /root option is not a directory/;
+
+      assert.throws(function () {
 
         restore({
           uri: 'ciao',
-          root: __dirname + 'error.js'
+          root: 'ciao',
         });
-      }, mex);
-      done();
-    });
-    it('should return wrong root (not dir)', function(done) {
 
-      var mex = 'root option is not a directory';
-      assert.throws(function() {
+}, mex);
+      done();
+
+});
+    it('should return different error message (exists)', function (done) {
+
+      let mex = /root option is not a directory/;
+
+      assert.throws(function () {
 
         restore({
           uri: 'ciao',
-          root: __dirname + '/error.js'
+          root: __dirname + 'error.js',
         });
-      }, mex);
+
+}, mex);
       done();
-    });
-  });
+
+});
+    it('should return wrong root (not dir)', function (done) {
+
+      let mex = 'root option is not a directory';
+
+      assert.throws(function () {
+
+        restore({
+          uri: 'ciao',
+          root: __dirname + '/error.js',
+        });
+
+}, mex);
+      done();
+
+});
+
+});
+
 });
