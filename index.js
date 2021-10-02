@@ -658,7 +658,13 @@ function wrapper (my) {
 
   }
 
-  makeDir(my.dir, function () {
+  makeDir(my.dir, function (err, pathname) {
+    if (err) {
+      logger.error('Failed to create directory', err);
+      return;
+    }
+
+    logger.info('Extracting tar to ' + my.dir);
 
     const extractor = require('tar').x({
       C: my.dir,
@@ -743,7 +749,7 @@ function restore (options) {
   }
 
   const my = {
-    dir: path.join(__dirname, 'dump', path.sep),
+    dir: typeof opt.dir === 'string' ? opt.dir : path.join(__dirname, 'dump', path.sep),
     uri: String(opt.uri),
     root: path.resolve(String(opt.root)) + path.sep,
     stream: opt.stream || null,
