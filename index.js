@@ -770,5 +770,7 @@ function restore (options) {
   }
   wrapper(my);
 
+  logger.end();
+
 }
 module.exports = restore;
