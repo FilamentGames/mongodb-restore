@@ -548,6 +548,8 @@ function wrapper (my) {
 
     }
 
+    logger.end();
+
   }
 
   /**
@@ -690,6 +692,8 @@ function wrapper (my) {
 
         }
 
+        callback('No backup found in extracted tar');
+
       });
 
     if (my.stream !== null) { // user stream
@@ -769,8 +773,6 @@ function restore (options) {
 
   }
   wrapper(my);
-
-  logger.end();
 
 }
 module.exports = restore;
